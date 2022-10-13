@@ -1,0 +1,6 @@
+
+rootProject.name = 'skywalker'
+
+include ':skywalker-server'
+//,
+//        ':skywalker-ui'

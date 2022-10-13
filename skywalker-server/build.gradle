@@ -1,0 +1,21 @@
+
+publishing {
+	publications {
+		main(MavenPublication) {
+			from components.java
+		}
+	}
+}
+
+apply from: 'dependencies.gradle'
+
+apply from: 'distribution.gradle'
+
+task copyMiscData(type: Copy) {
+	into "${buildDir}/misc/data"
+	from getProject().file('misc/data')
+}
+
+distTar.dependsOn copyMiscData
+distZip.dependsOn copyMiscData
+

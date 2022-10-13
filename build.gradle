@@ -1,0 +1,79 @@
+
+buildscript {
+	repositories {
+		mavenCentral()
+        maven { url "https://plugins.gradle.org/m2/" }
+	}
+
+	dependencies {
+		classpath "io.spring.gradle:dependency-management-plugin:1.0.3.RELEASE"
+	}
+}
+
+// Version built from Jenkins job/pipeline
+class Version {
+	String buildNumberString = System.getenv("BUILD_NUMBER")
+
+	String toString() {
+		if (buildNumberString == null) {
+			"2022.10.11.5"
+
+		} else {
+			int buildNumber = Integer.parseInt(buildNumberString)
+
+			"2022.10.11.$buildNumber"
+		}
+	}
+}
+
+allprojects  {
+  apply plugin: 'java'
+  apply plugin: 'eclipse'
+  apply plugin: 'project-report'
+
+  sourceCompatibility = 1.8
+  targetCompatibility = 1.8
+  compileJava.options.encoding = 'UTF-8'
+  
+  group='com.redmindset'
+
+  version = new Version().toString();
+ 
+  repositories {
+    jcenter()
+    mavenCentral()
+  }
+
+  task allDeps(type: DependencyReportTask) {}
+}
+
+subprojects {
+	apply plugin: 'maven-publish'
+	apply plugin: 'distribution'
+
+	dependencies {
+		compileOnly 'org.projectlombok:lombok:1.16.18' // *** No compile dependencies
+		testCompileOnly 'org.projectlombok:lombok:1.16.18' // *** No compile dependencies
+		annotationProcessor 'org.projectlombok:lombok:1.16.18'
+    }  
+}
+
+allprojects {
+	task showJavaVersion {
+		doLast {
+			println "Java Version: " + JavaVersion.current()
+		}
+	}
+}
+
+task checkDependencies() {
+    doLast {
+         configurations.compile.each { file ->
+        	if ( file.toString().contains('build') == false) {
+            	//println "TRACER checking: " + file.name
+            	assert file.exists()
+            	//TODO echo -e '\e[1A\e[K'
+            }
+        }
+    }
+}
